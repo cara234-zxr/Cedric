@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 关键：控制视口，禁止缩放，模拟App体验 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- iOS 全屏模式支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cedric Yu App</title>
+    <style>
+        /* --- 1. App 核心变量与复古配色 --- */
+        :root {
+            --bg-color: #F5F0E6; /* 米色背景 */
+            --card-bg: #FFFFFF;
+            --text-primary: #3E2723; /* 深咖 */
+            --text-secondary: #6D4C41; /* 浅咖 */
+            --accent-amber: #D4AF37; /* 琥珀金 */
+            --accent-rust: #A0522D; /* 铁锈红 */
+            --nav-bg: #2D1B15; /* 底部导航栏深色背景 */
+            --nav-active: #FFD700; /* 选中状态亮金 */
+            --font-serif: "Playfair Display", "Times New Roman", serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* 去除点击高亮 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            padding-bottom: 80px; /* 给底部导航栏留出空间 */
+            overflow-x: hidden;
+        }
+
+        /* --- 2. App 顶部标头 (Header) --- */
+        .app-header {
+            position: sticky;
+            top: 0;
+            background: rgba(245, 240, 230, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--accent-amber);
+            z-index: 900;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .brand-name {
+            font-family: var(--font-serif);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+
+        .contact-btn {
+            font-size: 0.8rem;
+            color: var(--bg-color);
+            background-color: var(--accent-rust);
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* --- 3. 底部导航栏 (Bottom Navigation) - App的核心特征 --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 65px;
+            background-color: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            padding-bottom: env(safe-area-inset-bottom); /* 适配 iPhone X 底部横条 */
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.7rem;
+            flex: 1;
+            height: 100%;
+            transition: all 0.3s;
+        }
+
+        .nav-item span.icon {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-item.active {
+            color: var(--nav-active);
+        }
+
+        /* --- 4. 内容区域 --- */
+        .content-section {
+            padding: 20px;
+            display: none; /* 默认隐藏所有板块，通过JS控制显示 */
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .content-section.active-section {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 主页样式 */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .profile-img-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: sepia(20%);
+        }
+
+        .profile-info {
+            padding: 20px;
+        }
+
+        .profile-info h1 {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            color: var(--accent-rust);
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .bio-text {
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* 网格布局 (Grid) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr; /* 手机端单列 */
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .section-header {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-amber);
+            padding-left: 10px;
+        }
+
+        /* 列表样式 */
+        .list-item {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-rust);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .year-badge {
+            background: var(--accent-amber);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 顶部栏 -->
+    <div class="app-header">
+        <div class="brand-name">Cedric Yu</div>
+        <a href="tel:+8615382360117" class="contact-btn">📞 联系我</a>
+    </div>
+
+    <!-- 页面内容容器 -->
+    <main>
+        <!-- 页面 1: 首页 (Profile) -->
+        <div id="page-home" class="content-section active-section">
+            <div class="profile-card">
+                <div class="profile-img-container">
+                    <!-- 本地图片 me.jpg -->
+                    <img src="images/me.jpg" alt="Cedric" onerror="this.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80'">
+                </div>
+                <div class="profile-info">
+                    <h1>Cedric Yu</h1>
+                    <p class="tagline">Vlog博主 / 视觉艺术家 / 历史行者</p>
+                    <p class="bio-text">
+                        📍 坐标：中国·杭州<br><br>
+                        在这个快节奏的时代，我用镜头丈量大好河山。从江南烟雨到大漠孤烟，我不仅是记录者，更是时间的拾荒者。
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body" style="text-align: center;">
+                    <h3 style="color: var(--accent-rust);">"让美丽事物变永恒"</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                        摄影是暂停时间的一瞬间，而那一瞬间属于永恒。我的作品致力于探索光影与历史的交错。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面 2: 足迹 (Global & China) -->
+        <div id="page-travel" class="content-section">
+            <h2 class="section-header">环球古迹</h2>
+            <div class="grid-container">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80" alt="Taj Mahal">
+                    <div class="card-body">
+                        <div class="card-title">🇮🇳 印度·泰姬陵</div>
+                        <p style="font-size: 0.8rem;">永恒的白色大理石诗篇。</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&q=80" alt="Rome">
+                    <div class="card-body">
+                        <div class="card-title">🇮🇹 意大利·罗马斗兽场</div>
+                        <p style="font-size: 0.8rem;">昔日帝国的余晖。</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-header" style="margin-top: 30px;">华夏申遗</h2>
+            <div class="grid-container">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80" alt="Great Wall">
+                    <div class="card-body">
+                        <div class="card-title">🇨🇳 北京·长城</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1562679576-c75565a03743?w=600&q=80" alt="West Lake">
+                    <div class="card-body">
+                        <div class="card-title">🇨🇳 杭州·西湖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面 3: 合作 (Business) -->
+        <div id="page-biz" class="content-section">
+            <h2 class="section-header">商业合作案例</h2>
+            <div class="list-item">
+                <h3 style="margin-bottom: 5px;">🎥 知名相机品牌</h3>
+                <p styl
